@@ -7,7 +7,7 @@ import {Route, Routes} from "react-router-dom";
 import {BooksPage} from "./pages/BooksPage";
 import {CreateBookPage} from "./pages/CreateBookPage";
 import {Layout} from "./layout/Layout";
-import { BookDescription } from './pages/BookDescription';
+import { BookDescription } from './pages/BookDescriptionPage';
 
 
 function App() {
