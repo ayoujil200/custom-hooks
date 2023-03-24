@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { React, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { NavBar } from "./NavBar";
-import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { ChangeEvent, useState } from "react";
 
 class Book {
     title?: string;
@@ -19,50 +19,55 @@ class Book {
 }
 
 export const CreateBookPage = () => {
-    const navigate = useNavigate();
-
     var title: string;
     var description: string;
     var categories: string;
     var author: string;
 
-    const [message, setMessage] = useState("");
     const create = () => {
         if (title && description && categories && author) {
             let book = new Book(title, author, categories, description);
-            let message = "your book created successfuly :)";
-            axios.post('http://localhost:8080/api/v1/books', book).then(navigate('/', { state: { message } }));
+            axios.post('http://localhost:8080/api/v1/books', book)
+                .then(() => {
+                    toast.success('your book created successfuly :)', {
+                        position: toast.POSITION.TOP_RIGHT,
+                        autoClose: 3000,
+                    });
+                })
+                .catch((error) => {
+                    toast.error(`Error: ${error.message}`, {
+                        position: toast.POSITION.TOP_RIGHT,
+                        autoClose: 3000,
+                    });
+                });
         } else {
-            setMessage("missing fields!");
+            toast.warning("missong fields", {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
         }
     }
 
     const getTitle = (e) => {
-        //alert(e.target.value)
         title = e.target.value;
     }
 
     const getDescription = (e) => {
-        //alert(e.target.value)
         description = e.target.value;
     }
 
     const getAuthor = (e) => {
-        //alert(e.target.value)
         author = e.target.value;
     }
 
     const getCategories = (e) => {
-        //alert(e.target.value)
         categories = e.target.value;
     }
 
     return (
         <>
             <NavBar />
-            {(message != "") ? <div class="col-8 p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300" role="alert">
-                {message}
-            </div> : null}
+            <ToastContainer />
             <div className="flex flex-row p-2 rounded shadow-md items-center">
                 <div className="basis-1/4  mx-2">
                     <div>
@@ -91,7 +96,7 @@ export const CreateBookPage = () => {
 
                 <div className="basis-1/4 mx-2">
                     <div>
-                        <button type="button" onClick={() => create()} class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-0 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Create new book</button>
+                        <button type="button" onClick={() => create()} class="text-white mt-5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-0 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Create new book</button>
                     </div>
                 </div>
             </div>

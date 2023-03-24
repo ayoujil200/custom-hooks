@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { NavBar } from "./NavBar";
+import { toast } from 'react-toastify';
 
 type Book = {
     id: number;
@@ -13,14 +14,12 @@ type Book = {
 }
 
 export const BooksPage = () => {
+    let titles = "";
+    let categories = "";
+
     const navigate = useNavigate();
     const location = useLocation();
-    let { message } = location || {};
-    try {
-        message = location.state.message;
-    } catch (e) {
-
-    }
+    const message = location.state && location.state.message;
     const [books, setBooks] = useState<Array<Book>>([]);
 
 
@@ -32,8 +31,22 @@ export const BooksPage = () => {
         });
     }
 
-    const handleSearchByCategories = async (e) => {
-        const response = await axios("/api/v1/books/filter&categories=" + e.target.value);
+    const handleSearchByCategories = (e) => {
+        categories = e.target.value;
+    }
+
+    const handleSearchByCategoriesAndTitles = async (e) => {
+        let url = `http://localhost:8080/api/v1/books/search`;
+        if (categories && titles) {
+            url += `?categories=${encodeURIComponent(categories)}&titles=${encodeURIComponent(titles)}`;
+        } else if (categories) {
+            url += `?categories=${encodeURIComponent(categories)}`;
+        } else if (titles) {
+            url += `?titles=${encodeURIComponent(titles)}`;
+        }
+
+        const response = await axios.get(url);
+
         setBooks(response.data);
     }
 
@@ -41,9 +54,8 @@ export const BooksPage = () => {
         navigate('/books/description', { state: { book } });
     }
 
-    const handleSearchByTitles = async (e) => {
-        const response = await axios("/api/v1/books/filter&titles=" + e.target.value);
-        setBooks(response.data);
+    const handleSearchByTitles = (e) => {
+        titles = e.target.value;
     }
 
     const fetchBooks = async () => {
@@ -53,14 +65,17 @@ export const BooksPage = () => {
 
     useEffect(() => {
         fetchBooks();
-    }, [])
+        if (message) {
+            toast.success(message, {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
+        }
+    }, [message])
 
     return (
         <>
             <NavBar />
-            {(message != "") ? <div class="col-8 p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300" role="alert">
-                {message}
-            </div> : null}
             <div class="relative overflow-x-auto">
                 <div class="flex m-2 items-center">
                     <label for="simple-search" class="sr-only">Search</label>
@@ -80,6 +95,7 @@ export const BooksPage = () => {
                         <input type="text" onChange={e => handleSearchByTitles(e)} id="simple-search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="search by titles (title1,title2,...)" required />
                     </div>
                 </div>
+                <button type="button" onClick={e => handleSearchByCategoriesAndTitles(e)} class="text-white ml-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Search</button>
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
